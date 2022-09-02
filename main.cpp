@@ -1,5 +1,3 @@
-#include <ctime>
-#include <math.h>
 #include <Windows.h>
 #include <windowsx.h>
 #include <d3d11.h>
