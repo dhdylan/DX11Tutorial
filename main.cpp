@@ -4,6 +4,10 @@
 #include <d3dx11.h>
 #include <d3dx10.h>
 
+#define SCREEN_WIDTH 1920
+#define SCREEN_HEIGHT 1080
+
+
 //global declarations
 IDXGISwapChain* swapChain;
 ID3D11Device* dev;
@@ -38,7 +42,7 @@ int WINAPI WinMain(	HINSTANCE hInstance,
 	wc.lpfnWndProc = WindowProc;
 	wc.hInstance = hInstance;
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
+	//wc.hbrBackground = (HBRUSH)COLOR_WINDOW; //removing the bakcground color so that when the app launches it doesn't flush the screen with this 
 	wc.lpszClassName = L"WindowClass1";
 
 	//register this window class
@@ -53,10 +57,10 @@ int WINAPI WinMain(	HINSTANCE hInstance,
 							L"WindowClass1",				//name of the window class
 							L"My first windowed program",	//title of the window
 							WS_OVERLAPPEDWINDOW,			//window style
-							300,							//x position of the window
-							300,							//y position of the window
-							wr.right - wr.left,							//width of the window
-							wr.bottom - wr.top,							//height of the window
+							0,							//x position of the window
+							0,							//y position of the window
+							SCREEN_WIDTH,							//width of the window
+							SCREEN_HEIGHT,							//height of the window
 							NULL,							//we have no parent window, NULL
 							NULL,							//we aren't using menus, NULL
 							hInstance,						//handle to the application instance
@@ -112,11 +116,14 @@ void InitD3D(HWND hWnd)
 
 	//fill out the struct
 	scd.BufferCount = 1;
+	scd.BufferDesc.Width = SCREEN_WIDTH;
+	scd.BufferDesc.Height = SCREEN_HEIGHT;
 	scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	scd.OutputWindow = hWnd;
-	scd.SampleDesc.Count = 4;
+	scd.SampleDesc.Count = 4; //how many samples for antialiasing ?
 	scd.Windowed = TRUE;
+	scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH; //allow fullscreen switching.
 
 	D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, NULL, NULL, NULL, D3D11_SDK_VERSION, &scd, &swapChain, &dev, NULL, &devcon);
 	#pragma endregion
@@ -136,8 +143,8 @@ void InitD3D(HWND hWnd)
 	D3D11_VIEWPORT viewport;
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
-	viewport.Width = 800;
-	viewport.Height = 600;
+	viewport.Width = SCREEN_WIDTH;
+	viewport.Height = SCREEN_HEIGHT;
 
 	devcon->RSSetViewports(1, &viewport);
 	#pragma endregion
@@ -146,6 +153,8 @@ void InitD3D(HWND hWnd)
 
 void CleanD3D()
 {
+	swapChain->SetFullscreenState(false, NULL);
+
 	dev->Release();
 	swapChain->Release();
 	devcon->Release();
