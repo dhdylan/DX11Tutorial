@@ -7,17 +7,29 @@
 #define SCREEN_WIDTH 1920
 #define SCREEN_HEIGHT 1080
 
+struct VERTEX
+{
+	float x, y, z;
+	D3DXCOLOR color;
+};
+
 
 //global declarations
 IDXGISwapChain* swapChain;
 ID3D11Device* dev;
 ID3D11DeviceContext* devcon;
 ID3D11RenderTargetView* backBuffer;
+ID3D11VertexShader* vertexShader;
+ID3D11PixelShader* pixelShader;
+ID3D11Buffer* vertexBuffer;
+ID3D11InputLayout* inputLayout;
 
 //function prototypes
 void InitD3D(HWND hWnd);
 void CleanD3D(void);
 void RenderFrame(void);
+void InitPipeline(void);
+void InitGraphics(void);
 
 //the WindowProc function prototype
 LRESULT CALLBACK WindowProc(HWND hWnd,	UINT message,	WPARAM wParam,	LPARAM lParam);
@@ -73,6 +85,7 @@ int WINAPI WinMain(	HINSTANCE hInstance,
 	MSG msg;
 
 	InitD3D(hWnd);
+
 
 
 
@@ -149,14 +162,21 @@ void InitD3D(HWND hWnd)
 	devcon->RSSetViewports(1, &viewport);
 	#pragma endregion
 
+	InitPipeline();
+	InitGraphics();
+
 }
 
 void CleanD3D()
 {
 	swapChain->SetFullscreenState(false, NULL);
 
-	dev->Release();
+	inputLayout->Release();
+	vertexShader->Release();
+	pixelShader->Release();
+	vertexBuffer->Release();
 	swapChain->Release();
+	dev->Release();
 	devcon->Release();
 	backBuffer->Release();
 }
@@ -168,8 +188,74 @@ void RenderFrame()
 
 	//render stuff here
 
+	//tell the context what buffer we're about to draw
+	UINT stride = sizeof(VERTEX);
+	UINT offset = 0;
+	devcon->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+
+	//what primitive are we drawing?
+	devcon->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	//draw to back buffer
+	devcon->Draw(3, 0);
+
 	//swap the buffers
 	swapChain->Present(0, 0);
+}
+
+
+
+void InitPipeline()
+{
+	//this is the memory where the compiled shader lives
+	//compile the shader and put it in VVVVV memory "blob"
+	ID3D10Blob *VS, *PS;
+	D3DX11CompileFromFile(L"shaders.shader", 0, 0, "VShader", "vs_4_0", 0, 0, 0, &VS, 0, 0);
+	D3DX11CompileFromFile(L"shaders.shader", 0, 0, "PShader", "ps_4_0", 0, 0, 0, &PS, 0, 0);
+
+	//creates shader objects
+	dev->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), NULL, &vertexShader);
+	dev->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), NULL, &pixelShader);
+
+	devcon->VSSetShader(vertexShader, 0, 0);
+	devcon->PSSetShader(pixelShader, 0, 0);
+
+	D3D11_INPUT_ELEMENT_DESC ied[] =
+	{
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
+	};
+	dev->CreateInputLayout(ied, 2, VS->GetBufferPointer(), VS->GetBufferSize(), &inputLayout);
+	devcon->IASetInputLayout(inputLayout);
+}
+
+void InitGraphics()
+{
+	VERTEX vertices[] =
+	{
+		{-0.5f, -0.5f, 0.0f, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)},
+		{0.5f, -0.5f, 0.0f, D3DXCOLOR(0.0f, 1.0f, 0.0f, 1.0f)},
+		{0.0f, 0.5f, 0.0f, D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f)}
+	};
+
+
+	//creating a vertexBuffer to hold the vertices V V V V V
+	//make a buffer description struct to hold some info on  the buffer we're making
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+
+	bd.ByteWidth = sizeof(VERTEX) * 3; //size of buffer
+	bd.Usage = D3D11_USAGE_DYNAMIC; //usage flag
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; //let CPU write to the buffer
+	
+	dev->CreateBuffer(&bd, NULL, &vertexBuffer); //create buffer on GPU
+
+	//copy data into buffer
+	D3D11_MAPPED_SUBRESOURCE ms;
+	devcon->Map(vertexBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms); //map the buffer so the GPU cant touch it while the CPU is writing to it
+	memcpy(ms.pData, vertices, sizeof(vertices)); //literally copy the data
+	devcon->Unmap(vertexBuffer, NULL); //unmap, GPU is allowed to look again
 }
 
 //this is the main message handler for the program
