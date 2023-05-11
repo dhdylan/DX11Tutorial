@@ -82,8 +82,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\216138\source\repos\DX11Tutorial\Common;C:\Users\216138\source\repos\DX11Tutorial\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\216138\source\repos\DX11Tutorial\Common;C:\Users\216138\source\repos\DX11Tutorial\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\release\lib\x64;$(LibraryPath)</LibraryPath>
+    <SourcePath>C:\Users\216138\source\repos\DX11Tutorial\Common;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -130,7 +131,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d11.lib;d3dx11.lib;d3dx10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>comctl32.lib;d3d11.lib;d3dx11.lib;d3dx10.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -151,12 +152,55 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Common\Camera.cpp" />
+    <ClCompile Include="Common\d3dApp.cpp" />
+    <ClCompile Include="Common\d3dUtil.cpp" />
+    <ClCompile Include="Common\DDSTextureLoader.cpp" />
+    <ClCompile Include="Common\dxerr.cpp" />
+    <ClCompile Include="Common\DXUT.cpp" />
+    <ClCompile Include="Common\DXUTDevice11.cpp" />
+    <ClCompile Include="Common\DXUTmisc.cpp" />
+    <ClCompile Include="Common\GameTimer.cpp" />
+    <ClCompile Include="Common\GeometryGenerator.cpp" />
+    <ClCompile Include="Common\LightHelper.cpp" />
+    <ClCompile Include="Common\MathHelper.cpp" />
+    <ClCompile Include="Common\ScreenGrab.cpp" />
+    <ClCompile Include="Common\TextureMgr.cpp" />
+    <ClCompile Include="Common\Waves.cpp" />
+    <ClCompile Include="Common\WICTextureLoader.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="shaders.shader" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Common\Camera.h" />
+    <ClInclude Include="Common\d3dApp.h" />
+    <ClInclude Include="Common\d3dUtil.h" />
+    <ClInclude Include="Common\d3dx11effect.h" />
+    <ClInclude Include="Common\DDSTextureLoader.h" />
+    <ClInclude Include="Common\dxerr.h" />
+    <ClInclude Include="Common\DXUT.h" />
+    <ClInclude Include="Common\DXUTDevice11.h" />
+    <ClInclude Include="Common\DXUTmisc.h" />
+    <ClInclude Include="Common\GameTimer.h" />
+    <ClInclude Include="Common\GeometryGenerator.h" />
+    <ClInclude Include="Common\LightHelper.h" />
+    <ClInclude Include="Common\MathHelper.h" />
+    <ClInclude Include="Common\ScreenGrab.h" />
+    <ClInclude Include="Common\TextureMgr.h" />
+    <ClInclude Include="Common\Waves.h" />
+    <ClInclude Include="Common\WICTextureLoader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\Microsoft.DXSDK.D3DX.targets" Condition="Exists('packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\Microsoft.DXSDK.D3DX.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\Microsoft.DXSDK.D3DX.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\Microsoft.DXSDK.D3DX.targets'))" />
+  </Target>
 </Project>
