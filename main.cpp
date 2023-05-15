@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <tchar.h>
+#include <string>
 
 class MyD3DApp : public D3DApp
 {
@@ -92,17 +93,17 @@ bool MyD3DApp::Init()
 			// Print display modes for this device
 			UINT numModes = 0;
 			output->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, 0, &numModes, NULL);
-			DXGI_MODE_DESC* modeDesc = static_cast<DXGI_MODE_DESC*>(calloc(numModes, sizeof(DXGI_MODE_DESC)));
+			DXGI_MODE_DESC* modeDesc= static_cast<DXGI_MODE_DESC*>(calloc(numModes, sizeof(DXGI_MODE_DESC)));
 			output->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, 0, &numModes, modeDesc);
 
-			for (unsigned int k = 0; k < (unsigned int)numModes; k++)
+			for (UINT k = 0; k < (UINT)numModes; k++)
 			{
-				Print(L"\t\t\tWIDTH: ");
-				Print((LPCWSTR)modeDesc[k].Width);
-				Print(L"\tHEIGHT: ");
-				Print((LPCWSTR)modeDesc[k].Height);
-				Print(L"\tREFRESH: ");
-				PrintLn((LPCWSTR)(modeDesc[k].RefreshRate.Numerator / modeDesc->RefreshRate.Denominator));
+				Print(L"\t\t\t\tWIDTH: ");
+				Print(std::to_wstring(modeDesc[k].Width).c_str());
+				Print(L"\t\t\tHEIGHT: ");
+				Print(std::to_wstring(modeDesc[k].Height).c_str());
+				Print(L"\t\t\tREFRESH: ");
+				PrintLn(std::to_wstring(modeDesc[k].RefreshRate.Numerator / modeDesc->RefreshRate.Denominator).c_str());
 			}
 
 			free(modeDesc);
