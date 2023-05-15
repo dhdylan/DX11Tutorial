@@ -498,4 +498,21 @@ void D3DApp::CalculateFrameStats()
 	}
 }
 
+IDXGIFactory* D3DApp::GetDXGIFactory()
+{
+	IDXGIDevice* dxgiDevice = 0;
+	HR(md3dDevice->QueryInterface(__uuidof(IDXGIDevice), (void**)&dxgiDevice));
+
+	IDXGIAdapter* dxgiAdapter = 0;
+	HR(dxgiDevice->GetParent(__uuidof(IDXGIAdapter), (void**)&dxgiAdapter));
+
+	IDXGIFactory* dxgiFactory = 0;
+	HR(dxgiAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&dxgiFactory));
+
+	ReleaseCOM(dxgiDevice);
+	ReleaseCOM(dxgiAdapter);
+
+	return dxgiFactory;
+}
+
 

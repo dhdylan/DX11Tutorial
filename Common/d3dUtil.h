@@ -10,7 +10,7 @@
 #include <crtdbg.h>
 #endif
  
-#include <d3dx11.h>
+#include <D3DX11.h>
 #include "d3dx11Effect.h"
 #include <DirectXMath.h>
 #include <DirectXPackedVector.h>

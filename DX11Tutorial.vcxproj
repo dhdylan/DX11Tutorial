@@ -82,9 +82,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\216138\source\repos\DX11Tutorial\Common;C:\Users\216138\source\repos\DX11Tutorial\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\216138\source\repos\DX11Tutorial\Common;C:\Users\216138\source\repos\DX11Tutorial\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\release\lib\x64;$(LibraryPath)</LibraryPath>
-    <SourcePath>C:\Users\216138\source\repos\DX11Tutorial\Common;$(SourcePath)</SourcePath>
+    <IncludePath>$(ProjectDir)\Common;$(ProjectDir)\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\Common;$(ProjectDir)\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\release\lib\x64;$(LibraryPath)</LibraryPath>
+    <SourcePath>$(ProjectDir)\Common;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>

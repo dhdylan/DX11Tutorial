@@ -47,6 +47,8 @@ protected:
 
 	void CalculateFrameStats();
 
+	IDXGIFactory* GetDXGIFactory();
+
 protected:
 
 	HINSTANCE mhAppInst;
