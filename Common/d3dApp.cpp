@@ -498,21 +498,15 @@ void D3DApp::CalculateFrameStats()
 	}
 }
 
-IDXGIFactory* D3DApp::GetDXGIFactory()
+void D3DApp::Print(LPCWSTR str)
 {
-	IDXGIDevice* dxgiDevice = 0;
-	HR(md3dDevice->QueryInterface(__uuidof(IDXGIDevice), (void**)&dxgiDevice));
+	OutputDebugStringW(str);
+}
 
-	IDXGIAdapter* dxgiAdapter = 0;
-	HR(dxgiDevice->GetParent(__uuidof(IDXGIAdapter), (void**)&dxgiAdapter));
-
-	IDXGIFactory* dxgiFactory = 0;
-	HR(dxgiAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&dxgiFactory));
-
-	ReleaseCOM(dxgiDevice);
-	ReleaseCOM(dxgiAdapter);
-
-	return dxgiFactory;
+void D3DApp::PrintLn(LPCWSTR str)
+{
+	OutputDebugStringW(str);
+	OutputDebugStringW(L"\n");
 }
 
 

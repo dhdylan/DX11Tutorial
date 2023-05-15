@@ -47,7 +47,9 @@ protected:
 
 	void CalculateFrameStats();
 
-	IDXGIFactory* GetDXGIFactory();
+	//my helper functions
+	void Print(LPCWSTR str);
+	void PrintLn(LPCWSTR str);
 
 protected:
 
