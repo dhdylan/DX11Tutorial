@@ -68,7 +68,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders.shader" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -123,5 +122,8 @@
     <ClInclude Include="Common\WICTextureLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="Color.fx" />
   </ItemGroup>
 </Project>
