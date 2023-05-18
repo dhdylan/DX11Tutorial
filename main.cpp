@@ -1,8 +1,15 @@
 #include "d3dApp.h"
+#include <MathHelper.h>
+#include <d3dx11effect.h>
 #include <stdio.h>
 #include <iostream>
 #include <tchar.h>
 #include <string>
+
+struct VERTEX {
+	XMFLOAT3 Pos;
+	XMFLOAT4 Color;
+};
 
 class MyD3DApp : public D3DApp
 {
