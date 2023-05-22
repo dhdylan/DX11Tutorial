@@ -90,7 +90,6 @@ bool MyD3DApp::Init()
 {
 	if (!D3DApp::Init())
 		return false;
-	return true;
 
 	BuildGeometryBuffers();
 	BuildFX();
@@ -164,3 +163,154 @@ void MyD3DApp::DrawScene()
 	// Present the back buffer to the screen.
 	HR(mSwapChain->Present(0, 0));
 }
+
+void MyD3DApp::OnMouseDown(WPARAM btnState, int x, int y)
+{
+	mLastMousePos.x = x;
+	mLastMousePos.y = y;
+
+	SetCapture(mhMainWnd);
+}
+
+
+void MyD3DApp::OnMouseUp(WPARAM btnState, int x, int y)
+{
+	ReleaseCapture();
+}
+
+void MyD3DApp::OnMouseMove(WPARAM btnState, int x, int y)
+{
+	if ((btnState & MK_LBUTTON) != 0)
+	{
+		// Make each pixel correspond to a quarter of a degree
+		float dx = XMConvertToRadians(0.25f * static_cast<float>(x - mLastMousePos.x));
+		float dy = XMConvertToRadians(0.25f * static_cast<float>(y - mLastMousePos.y));
+		
+		// Update angles based on input to orbit camera around box.
+		mTheta += dx;
+		mPhi += dy;
+		// Restrict the angle mPhi.
+		mPhi = MathHelper::Clamp(mPhi, 0.1f, MathHelper::Pi - 0.1f);
+	}
+	else if ((btnState & MK_RBUTTON) != 0)
+	{
+		// Make each pixel correspond to 0.005 unit in the scene.
+		float dx = 0.005f * static_cast<float>(x - mLastMousePos.x);
+		float dy = 0.005f * static_cast<float>(y - mLastMousePos.y);
+		// Update the camera radius based on input.
+		mRadius += dx - dy;
+		// Restrict the radius.
+		mRadius = MathHelper::Clamp(mRadius, 3.0f, 15.0f);
+	}
+
+	mLastMousePos.x = x;
+	mLastMousePos.y = y;
+}
+
+void MyD3DApp::BuildGeometryBuffers()
+{
+	// Create vertex buffer
+	VERTEX vertices[] =
+	{
+	{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4((const float*)&Colors::White) },
+	{ XMFLOAT3(-1.0f, +1.0f, -1.0f), XMFLOAT4((const float*)&Colors::Black) },
+	{ XMFLOAT3(+1.0f, +1.0f, -1.0f), XMFLOAT4((const float*)&Colors::Red) },
+	{ XMFLOAT3(+1.0f, -1.0f, -1.0f), XMFLOAT4((const float*)&Colors::Green) },
+	{ XMFLOAT3(-1.0f, -1.0f, +1.0f), XMFLOAT4((const float*)&Colors::Blue) },
+	{ XMFLOAT3(-1.0f, +1.0f, +1.0f), XMFLOAT4((const float*)&Colors::Yellow) },
+	{ XMFLOAT3(+1.0f, +1.0f, +1.0f), XMFLOAT4((const float*)&Colors::Cyan) },
+	{ XMFLOAT3(+1.0f, -1.0f, +1.0f), XMFLOAT4((const float*)&Colors::Magenta) }
+	};
+
+	D3D11_BUFFER_DESC vertexBufferDesc;
+	vertexBufferDesc.Usage = D3D11_USAGE::D3D11_USAGE_IMMUTABLE;
+	vertexBufferDesc.ByteWidth = sizeof(VERTEX) * 8;
+	vertexBufferDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA initData;
+	initData.pSysMem = vertices;
+	HR(md3dDevice->CreateBuffer(&vertexBufferDesc, &initData, &mBoxVertexBuffer));
+
+	UINT indices[] = {
+		// front face
+		0, 1, 2,
+		0, 2, 3,
+		// back face
+		4, 6, 5,
+		4, 7, 6,
+		// left face
+		4, 5, 1,
+		4, 1, 0,
+		// right face
+		3, 2, 6,
+		3, 6, 7,
+		// top face
+		1, 5, 6,
+		1, 6, 2,
+		// bottom face
+		4, 0, 3,
+		4, 3, 7
+	};
+
+	D3D11_BUFFER_DESC indexBufferDesc;
+	indexBufferDesc.Usage = D3D11_USAGE::D3D11_USAGE_IMMUTABLE;
+	indexBufferDesc.ByteWidth = sizeof(UINT) * 36;
+	indexBufferDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+	D3D11_SUBRESOURCE_DATA indexInitData;
+	indexInitData.pSysMem = indices;
+	HR(md3dDevice->CreateBuffer(&indexBufferDesc, &indexInitData, &mBoxIndexBuffer));
+}
+
+void MyD3DApp::BuildFX()
+{
+	DWORD shaderFlags = 0;
+#if defined(DEBUG) || defined(_DEBUG)
+	shaderFlags |= D3D10_SHADER_DEBUG;
+	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
+#endif
+
+	ID3D10Blob* compiledShader = 0;
+	ID3D10Blob* compilationMsgs = 0;
+	HRESULT hr = D3DX11CompileFromFile(L"./color.fx", 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
+
+	// compilationMsgs can store errors or warnings.
+	if (compilationMsgs != 0)
+	{
+		MessageBoxA(0, (char*)compilationMsgs->GetBufferPointer(), 0, 0);
+		ReleaseCOM(compilationMsgs)
+	}
+
+	//Even if there were no compilationMsgs, make sure there are no errors.
+	if (FAILED(hr))
+	{
+		DXTrace(__FILEW__, (DWORD)__LINE__, hr, L"D3DX11CompileFromFile", true);
+	}
+
+	HR(D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, md3dDevice, &mEffect));
+
+	// Done with the compiled shader
+	ReleaseCOM(compiledShader);
+
+	mEffectTechnique = mEffect->GetTechniqueByName("CoorTech");
+	mEffectWorldViewProjMatrix = mEffect->GetVariableByName("gWorldViewProj")->AsMatrix();
+}
+
+void MyD3DApp::BuildVertexLayout()
+{
+	D3D11_INPUT_ELEMENT_DESC vertexDesc[] = {
+		{"POSITION", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"COLOR", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0}
+	};
+
+	// create input layout
+	D3DX11_PASS_DESC passDesc;
+	mEffectTechnique->GetPassByIndex(0)->GetDesc(&passDesc);
+	HR(md3dDevice->CreateInputLayout(vertexDesc, 2, passDesc.pIAInputSignature, passDesc.IAInputSignatureSize, &mInputLayout));
+}
+
